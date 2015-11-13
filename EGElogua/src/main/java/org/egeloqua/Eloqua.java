@@ -126,4 +126,17 @@ public class Eloqua {
 			return null;
 		}		
 	}
+	
+	public Account updateAccount(Account acc) {
+		try{
+			Gson gson = new Gson();
+			String sRequest = gson.toJson(acc);
+			String sResponse = client.execute("/data/account/" + acc.id, "PUT", sRequest);
+			
+			return gson.fromJson(sResponse, Account.class);
+		}catch (Exception e) {
+	          e.printStackTrace();
+	          return null;
+		}
+	}
 }
