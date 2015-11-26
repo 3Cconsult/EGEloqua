@@ -77,6 +77,27 @@ public class Eloqua {
 		}
 	}
 	
+	public void delContact(String id){
+		try{
+			Gson gson = new Gson();
+			String sResponse = client.execute("/data/contact/" +id, "DELETE","");
+		}catch (Exception e) {
+	          e.printStackTrace();
+		}
+	}
+
+	public Contact insertContact(Contact c){
+		try{
+			Gson gson = new Gson();
+			String sRequest = gson.toJson(c);
+			String sResponse = client.execute("/data/contact", "POST", sRequest);
+			
+			return gson.fromJson(sResponse, Contact.class);
+		}catch (Exception e) {
+	          e.printStackTrace();
+	          return null;
+		}
+	}
 	public Contact updateContact(Contact c) {
 		try{
 			Gson gson = new Gson();
@@ -100,6 +121,18 @@ public class Eloqua {
 		
 		c = temp;
 		return c;
+	}
+	public Account insertAccount(Account acc){
+		try{
+			Gson gson = new Gson();
+			String sRequest = gson.toJson(acc);
+			String sResponse = client.execute("/data/account", "POST", sRequest);
+			
+			return gson.fromJson(sResponse, Account.class);
+		}catch (Exception e) {
+	          e.printStackTrace();
+	          return null;
+		}
 	}
 	
 	public List <Account> getAccounts(String name){
@@ -139,4 +172,14 @@ public class Eloqua {
 	          return null;
 		}
 	}
+
+	public void delAccount(String id){
+		try{
+			Gson gson = new Gson();
+			String sResponse = client.execute("/data/account/" +id, "DELETE","");
+		}catch (Exception e) {
+	          e.printStackTrace();
+		}
+	}
+	
 }

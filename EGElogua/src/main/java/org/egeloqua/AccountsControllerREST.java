@@ -18,29 +18,40 @@ public class AccountsControllerREST {
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public List<Account> findAccounts() {
+		System.out.println("query1");
 		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
-		List<Account> oListOfAccounts = eloqua.getAccounts("te*"); // Query Accounts
+		List<Account> oListOfAccounts = eloqua.getAccounts("test*"); // Query Accounts
+		System.out.println("query2");
 		return oListOfAccounts;
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
 	public Account addAccount(@RequestBody Account account){
+		System.out.println("beforeInsert ");
+		
 		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
-		Account oAccount = eloqua.updateAccount(account);
+		Account oAccount = eloqua.insertAccount(account);
+		System.out.println("afterInsert ");
+
 		return oAccount;
 	}
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public Account updateAccount(@RequestBody Account updatedAccount, @PathVariable Integer id) {
+		System.out.println("beforeUpdate "+id);
+
 		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
 		Account oAccount = eloqua.updateAccount(updatedAccount);
+		System.out.println("afterUpdate "+id);
 		return oAccount;
 	}
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public void deleteAccount(@PathVariable Integer id) {
-		// TODO: implement delete;
+		System.out.println("beforeDelete "+id);
+		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
+		eloqua.delAccount(id.toString());
+		System.out.println("afterDelete "+id);
 	}
-  
 }
 
