@@ -60,10 +60,8 @@
 								<div ng-if="col.dataType !== 'command' && (tab1.isEditing || row.isEditing) && !col.isReadOnly" class="controls" ng-class="rowForm[col.field].$invalid && rowForm[col.field].$dirty ? 'has-error' : ''" ng-switch="col.dataType">
 									<input ng-switch-default type="text" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" />
 									<input ng-switch-when="number" type="number" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" />
-									<select ng-switch-when="pick" ng-model="row[col.field]" ng-options="acc.name as acc.name for acc in tab1.accounts"></select>
+									<select ng-switch-when="pick" ng-model="row[col.field]" ng-options="acc.name as acc.name for acc in tab1.accounts" ng-change = "tab1.selectAccount(row,rowForm,col.field)" class="editable-input form-control input-sm"></select>
 								</div>
-								
-								
 								<div ng-if="col.dataType === 'command'">
 									<div class="brn-group pull-right">
 										<button class="btn btn-primary btn-sm" ng-click="tab1.save(row, rowForm)" ng-if="row.isEditing" ng-disabled="rowForm.$pristine || rowForm.$invalid"><span class="glyphicon glyphicon-ok"></span></button>

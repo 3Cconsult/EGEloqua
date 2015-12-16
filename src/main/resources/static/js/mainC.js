@@ -10,7 +10,6 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 	function contactTableController(NgTableParams, Contact, Account) {
 		var self = this;
 		var originalData = angular.copy(dataset);
-
 		self.cols = [
 			{
 				field : "action",
@@ -66,13 +65,24 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				field : "accountName",
 				title : "accountName",
 				filter : {
-					accountName : "text"
+					accountName : "pick"
 				},
 				sortable : "accountName",
 				dataType : "pick",
 				show : true,
 				isReadOnly : false,
 				width : '10%'
+			}, {
+				field : "accountId",
+				title : "accountId",
+				filter : {
+					accountId : "text"
+				},
+				sortable : "accountId",
+				dataType : "text",
+				show : true,
+				isReadOnly : true,
+				width : '10%'				
 			}, {
 				field : "address1",
 				title : "Address",
@@ -140,7 +150,13 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 		self.save = save;
 		self.getContacts = getContacts;
 		self.uploadContacts = uploadContacts;
-
+		self.selectAccount = selectAccount;
+		function selectAccount(row,rowForm,fieldName){
+			var acc = _.find(self.accounts, function (item) {
+				return item.name === row.accountName;
+			});
+			row.accountId = acc.id;
+		}
 		function add() {
 			self.isEditing = true;
 			self.isAdding = true;
