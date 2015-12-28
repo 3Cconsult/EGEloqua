@@ -1,7 +1,8 @@
 angular.module("sv.ContactServices", ["ngResource"]);
 (function(angular) {
   var ContactFactory = function($resource) {
-    return $resource('/contactsAPI/:id', {
+  //  return $resource('http://localhost:8080/contactsAPI/:id', {
+      return $resource('/contactsAPI/:id', {
       id: '@id'
     }, {
       update: {

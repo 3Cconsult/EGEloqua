@@ -26,7 +26,7 @@
 			<div class="row">
 				<div class="col-md-8" ng-controller="contactTableController as tab1">
 					<div class="brn-group pull-left">
-						<button class="btn btn-default pull-left" ng-click="tab1.getContacts()">
+						<button class="btn btn-default pull-left" ng-click="tab1.getContacts();$filterRow.disabled=false">
 							<span class="glyphicon glyphicon-download"></span>
 						</button>				
 						<button class="btn btn-primary" ng-if="tab1.hasChanges()" ng-disabled="tab1.tableTracker.$invalid" ng-click="tab1.uploadContacts()">
@@ -35,40 +35,33 @@
 
 					</div>
 					<div class="brn-group pull-right"  uib-dropdown>						
+						<button class="btn btn-danger btn-default" ng-click="tab1.deleteRows()">
+							<span class="glyphicon glyphicon-trash"></span>
+						</button>
+
 						<button class="btn btn-default" ng-if="tab1.isEditing" ng-click="tab1.cancelChanges()">
 							<span class="glyphicon glyphicon-remove"></span>
 						</button>
-						<button class="btn btn-primary" ng-if="!tab1.isEditing" ng-click="tab1.isEditing = true">
-							<span class="glyphicon glyphicon-pencil"></span>
-						</button>
-						<button class="btn btn-primary" ng-if="tab1.isEditing" ng-disabled="!tab1.hasChanges() || tab1.tableTracker.$invalid" ng-click="tab1.saveChanges()">
+						<button class="btn btn-primary" ng-if="!tab1.isEditing" ng-click="tab1.isEditing = true; tab1.selectAllRows();">
 							<span class="glyphicon glyphicon-ok"></span>
 						</button>
 						<button class="btn btn-default" ng-click="tab1.add()">
 							<span class="glyphicon glyphicon-plus"></span>
 						</button>
-						<button class="btn btn-default" ng-click="showFilter = !showFilter">
-							<span class="glyphicon glyphicon-filter"></span>
-						</button>
 						<sv-multiselect info="tab1.cols" ></sv-multiselect>						
 					</div>						
 					
-					<table ng-table-dynamic="tab1.tableParams with tab1.cols" class="table table-bordered table-condensed table-hover editable-table" ng-form="tab1.tableForm" disable-filter="tab1.isAdding" tracked-table="tab1.tableTracker" show-filter="showFilter">
+					<table ng-table-dynamic="tab1.tableParams with tab1.cols" class="table table-bordered table-condensed table-hover editable-table" ng-form="tab1.tableForm" disable-filter="tab1.isAdding" tracked-table="tab1.tableTracker" >
 						<tr ng-repeat="row in $data" ng-form="rowForm" tracked-table-row="row">
 							<td ng-repeat="col in $columns" ng-class="rowForm[col.field].$dirty ? 'bg-warning' : ''" ng-form="{{col.field}}" tracked-table-cell ng-style="{ width: col.width }">
-								<span ng-if="col.dataType !== 'command' && ((!tab1.isEditing && !row.isEditing) || col.isReadOnly)" class="editable-text">{{row[col.field]}}</span>
-								<div ng-if="col.dataType !== 'command' && (tab1.isEditing || row.isEditing) && !col.isReadOnly" class="controls" ng-class="rowForm[col.field].$invalid && rowForm[col.field].$dirty ? 'has-error' : ''" ng-switch="col.dataType">
-									<input ng-switch-default type="text" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" />
-									<input ng-switch-when="number" type="number" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" />
+								<span ng-if="col.dataType !== 'command' && ((!row.isEditing && !row.isInsert) || col.isReadOnly)" class="editable-text" ng-dblclick="tab1.invertEdit(row)">{{row[col.field]}}</span>
+								<div ng-if="col.dataType !== 'command' && (row.isEditing || row.isInsert) && !col.isReadOnly" class="controls" ng-class="rowForm[col.field].$invalid && rowForm[col.field].$dirty ? 'has-error' : ''" ng-switch="col.dataType">
+									<input ng-switch-default type="text" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" ng-change="tab1.onCellChange(row,rowForm,col.field)"/>
+									<input ng-switch-when="number" type="number" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" ng-change="tab1.onCellChange(row,rowForm,col.field)"/>
 									<select ng-switch-when="pick" ng-model="row[col.field]" ng-options="acc.name as acc.name for acc in tab1.accounts" ng-change = "tab1.selectAccount(row,rowForm,col.field)" class="editable-input form-control input-sm"></select>
 								</div>
 								<div ng-if="col.dataType === 'command'">
-									<div class="brn-group pull-right">
-										<button class="btn btn-primary btn-sm" ng-click="tab1.save(row, rowForm)" ng-if="row.isEditing" ng-disabled="rowForm.$pristine || rowForm.$invalid"><span class="glyphicon glyphicon-ok"></span></button>
-										<button class="btn btn-default btn-sm" ng-click="tab1.cancel(row, rowForm)" ng-if="row.isEditing"><span class="glyphicon glyphicon-remove"></span></button>
-										<button class="btn btn-default btn-sm" ng-click="row.isEditing = true" ng-if="!row.isEditing"><span class="glyphicon glyphicon-pencil"></span></button>
-										<button class="btn btn-danger btn-sm" ng-click="tab1.del(row)" ng-if="!row.isEditing"><span class="glyphicon glyphicon-trash"></span></button>
-									</div>
+									<input type="checkbox" ng-click="tab1.processEdit(row)" ng-model = "row.isEditing" />
 								</div>					
 							</td>
 						</tr>

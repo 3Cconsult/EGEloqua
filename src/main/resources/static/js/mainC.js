@@ -4,19 +4,20 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 	"use strict";
 	var dataset = [];
 	var accounts = [];
+	var accountNames = [];
 
 	angular.module("myApp").controller("contactTableController", contactTableController);
-	contactTableController.$inject = ["NgTableParams", "Contact","Account"];
+	contactTableController.$inject = ["NgTableParams", "Contact","Account","$scope"];
 	function contactTableController(NgTableParams, Contact, Account) {
 		var self = this;
 		var originalData = angular.copy(dataset);
 		self.cols = [
 			{
 				field : "action",
-				title : "Control",
+				title : "",
 				dataType : "command",
 				show : true,
-				width : '10%'
+				width : '4%'
 			},	{
 				field : "id",
 				title : "ID",
@@ -27,7 +28,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				dataType : "text",
 				show : true,
 				isReadOnly : true,
-				width : '4%'
+				width : '8%'
 			}, {
 				field : "firstName",
 				title : "firstName",
@@ -65,13 +66,14 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				field : "accountName",
 				title : "accountName",
 				filter : {
-					accountName : "pick"
+					accountName : "text"
 				},
+				filterData: getAccountNames,
 				sortable : "accountName",
 				dataType : "pick",
 				show : true,
 				isReadOnly : false,
-				width : '10%'
+				width : '15%'
 			}, {
 				field : "accountId",
 				title : "accountId",
@@ -130,39 +132,102 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			}
 		];
 		
+		
+
 		self.tableParams = new NgTableParams({
-				count : 5
+				filter:{}
+				,count : 5
 			}, {
 				counts : [5, 20, 100],
 				dataset : angular.copy(dataset)
 			});
+		self.getAccountNames = getAccountNames;
 		self.accounts = accounts;
 		self.aDelete = [];
-
+		self.aEdit =[];
+		
 		self.add = add;
 		self.cancelChanges = cancelChanges;
-		self.del = del;
+		self.deleteRows = deleteRows;
+		
 		self.hasChanges = hasChanges;
 		self.saveChanges = saveChanges;
-
+		self.selectAllRows = selectAllRows;
 		self.cancel = cancel;
-		self.del = del;
 		self.save = save;
 		self.getContacts = getContacts;
 		self.uploadContacts = uploadContacts;
 		self.selectAccount = selectAccount;
+		self.invertEdit = invertEdit;
+		self.processEdit = processEdit;
+		self.onCellChange = onCellChange;
+
+		function getAccountNames(){
+			return accountNames;
+		}
+		function processEdit(row){
+			if(row.isEditing == true){
+				var contactRow = _.find(self.aEdit,function(row2){
+					return (row2.id === row.id);
+				});
+				if (contactRow == null){
+					self.aEdit.push(row);
+				}
+			}else{
+				_.remove(self.aEdit,function(row2){
+					return (row2.id === row.id);
+				});
+			}
+		}
+
+		function invertEdit (row){
+			row.isEditing = !row.isEditing;
+			self.processEdit(row);
+		}
+
+		function selectAllRows(){
+			_.each(self.tableParams.data, function (row) {
+				row.isEditing = true;
+				self.processEdit(row);
+			});
+		}
+
+		function onCellChange(row,rowForm,fieldName){
+			_.each(self.aEdit, function (item) {
+				if(row.id !== item.id){
+					item[fieldName]=row[fieldName];
+				}
+			});
+		}
 		function selectAccount(row,rowForm,fieldName){
 			var acc = _.find(self.accounts, function (item) {
 				return item.name === row.accountName;
 			});
 			row.accountId = acc.id;
+			self.onCellChange(row,rowForm,fieldName);
+			self.onCellChange(row,rowForm,"accountId");
+		}
+		
+		function checkPopup(row,rowForm,fieldName){
+			var cntAccs = 0;
+			var curAcc = null;
+			_.each(self.accounts, function (acc){
+				if(acc.name == row.accountName){
+					cntAccs +=1;
+					curAcc = acc;
+				}
+			});
+			if(cntAccs===1){
+				row.accountId = curAcc.id;
+			}
 		}
 		function add() {
 			self.isEditing = true;
 			self.isAdding = true;
 			self.tableParams.settings().dataset.unshift( new Contact({
 				name : "",
-				isInsert : true
+				isInsert : true,
+				isEditing : true
 			}));
 			// we need to ensure the user sees the new row we've just added.
 			// it seems a poor but reliable choice to remove sorting and move them to the first page
@@ -171,6 +236,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			self.tableParams.page(1);
 			self.tableParams.reload();
 		}
+		
 		function getContacts() {
 			Contact.query(function (response) {
 				var resp = response ? response : [];
@@ -184,11 +250,16 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			Account.query(function (response) {
 				var resp = response ? response : [];
 				self.accounts = resp;
+				
+				_.each(self.accounts, function (acc){
+					accountNames.push(acc.name);	
+				});
 			});
-
+			self.aEdit=[];
 		}
+		
 		function uploadContacts() {
-			self.saveChanges();		
+	//		self.saveChanges();		
 			_.each(self.aDelete, function (item) {
 				item.$delete();
 			});
@@ -202,7 +273,11 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 						item.$update();
 					}
 				}
+				if(item.isEditing){
+					item.isEditing = false;
+				}
 			});
+			self.editCnt=0;
 
 		}
 
@@ -218,16 +293,24 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			}
 		}
 
-		function del(row) {
-			var acc = _.find(originalData, function (item) {
+		function deleteRows() {
+			var aRemove = [];
+			_.each(self.tableParams.settings().dataset, function (row) {
+				if (row != null && row.isEditing) {
+					aRemove.push(row);
+					var acc = _.find(originalData, function (item) {
+						return row.id === item.id;
+					});
+					self.aDelete.push(acc);
+					self.tableTracker.untrack(row);
+				}
+			});
+			_.each(aRemove,function(row){
+				_.remove(self.tableParams.settings().dataset, function (item) {
 					return row.id === item.id;
 				});
-			self.aDelete.push(acc);
-
-			_.remove(self.tableParams.settings().dataset, function (item) {
-				return row.id === item.id;
 			});
-			self.tableTracker.untrack(row);
+			
 			self.tableParams.reload().then(function (data) {
 				if (data.length === 0 && self.tableParams.total() > 0) {
 					self.tableParams.page(self.tableParams.page() - 1);
@@ -235,13 +318,13 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				}
 			});
 		}
+		
 		function resetRow(row, rowForm) {
 			row.isEditing = false;
 			rowForm.$setPristine();
 			self.tableTracker.untrack(row);
 			return _.find(originalData, function (r) {
 				var ret = (r.id === row.id);
-				var aa = 0;
 				return ret;
 			});
 		}
@@ -314,6 +397,7 @@ in the table as the user pages within the grid
 
 	function trackedTableController($scope, $parse, $attrs, $element) {
 		var self = this;
+
 		var tableForm = $element.controller("form");
 		var dirtyCellsByRow = [];
 		var invalidCellsByRow = [];
@@ -355,6 +439,14 @@ in the table as the user pages within the grid
 
 		function setCellDirty(row, cell, isDirty) {
 			row.isDirty = true;
+//			_.each($scope.$data,function (row2){
+//					if(row2.isEditing && row2.id !== row.id){
+//						row2[cell] = row[cell];
+//						if(cell ==="accountName"){
+//							row2["accountId"] = row["accountId"];
+//						}
+//					}
+//				});
 			setCellStatus(row, cell, isDirty, dirtyCellsByRow);
 		}
 

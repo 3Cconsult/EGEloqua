@@ -1,6 +1,7 @@
 angular.module("sv.AccountServices", ["ngResource"]);
 (function(angular) {
   var AccountFactory = function($resource) {
+//      return $resource('http://localhost:8080//accountsAPI/:id', {
     return $resource('/accountsAPI/:id', {
       id: '@id'
     }, {
