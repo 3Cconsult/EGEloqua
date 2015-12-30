@@ -1,4 +1,4 @@
-angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', 'sv.multiselect', "sv.ContactServices","sv.AccountServices"]);
+angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', 'sv.multiselect', "sv.ContactServices","sv.AccountServices",'sv.multiselect','sv.picklist']);
 
 (function () {
 	"use strict";
@@ -65,6 +65,18 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			}, {
 				field : "accountName",
 				title : "accountName",
+				filter : {
+					accountName : "text"
+				},
+				filterData: getAccountNames,
+				sortable : "accountName",
+				dataType : "pick2",
+				show : true,
+				isReadOnly : false,
+				width : '15%'
+			}, {
+				field : "accountName",
+				title : "accountName2",
 				filter : {
 					accountName : "text"
 				},
@@ -161,6 +173,9 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 		self.invertEdit = invertEdit;
 		self.processEdit = processEdit;
 		self.onCellChange = onCellChange;
+		self.getAccounts= function(){
+			return angular.copy(self.accounts);
+		}
 
 		function getAccountNames(){
 			return accountNames;
@@ -192,23 +207,23 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			});
 		}
 
-		function onCellChange(row,rowForm,fieldName){
+		function onCellChange(row,fieldName){
 			_.each(self.aEdit, function (item) {
 				if(row.id !== item.id){
 					item[fieldName]=row[fieldName];
 				}
 			});
 		}
-		function selectAccount(row,rowForm,fieldName){
+		function selectAccount(row,fieldName){
 			var acc = _.find(self.accounts, function (item) {
 				return item.name === row.accountName;
 			});
 			row.accountId = acc.id;
-			self.onCellChange(row,rowForm,fieldName);
-			self.onCellChange(row,rowForm,"accountId");
+			self.onCellChange(row,fieldName);
+			self.onCellChange(row,"accountId");
 		}
 		
-		function checkPopup(row,rowForm,fieldName){
+/*		function checkPopup(row,rowForm,fieldName){
 			var cntAccs = 0;
 			var curAcc = null;
 			_.each(self.accounts, function (acc){
@@ -221,6 +236,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				row.accountId = curAcc.id;
 			}
 		}
+*/
 		function add() {
 			self.isEditing = true;
 			self.isAdding = true;
@@ -277,8 +293,6 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 					item.isEditing = false;
 				}
 			});
-			self.editCnt=0;
-
 		}
 
 		function cancelChanges() {

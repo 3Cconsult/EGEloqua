@@ -17,6 +17,7 @@
 		<script type="text/javascript" src="./js/ng-table.min.js"></script>
 		<script type="text/javascript" src="./js/lodash.min.js"></script>
 		<script type="text/javascript" src="./js/sv-multiselect.js"></script>
+		<script type="text/javascript" src="./js/sv-picklist.js"></script>		
 		<script type="text/javascript" src="./js/contactServices.js"></script>
 		<script type="text/javascript" src="./js/accountServices.js"></script>
 		<script type="text/javascript" src="./js/mainC.js"></script>
@@ -56,9 +57,10 @@
 							<td ng-repeat="col in $columns" ng-class="rowForm[col.field].$dirty ? 'bg-warning' : ''" ng-form="{{col.field}}" tracked-table-cell ng-style="{ width: col.width }">
 								<span ng-if="col.dataType !== 'command' && ((!row.isEditing && !row.isInsert) || col.isReadOnly)" class="editable-text" ng-dblclick="tab1.invertEdit(row)">{{row[col.field]}}</span>
 								<div ng-if="col.dataType !== 'command' && (row.isEditing || row.isInsert) && !col.isReadOnly" class="controls" ng-class="rowForm[col.field].$invalid && rowForm[col.field].$dirty ? 'has-error' : ''" ng-switch="col.dataType">
-									<input ng-switch-default type="text" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" ng-change="tab1.onCellChange(row,rowForm,col.field)"/>
-									<input ng-switch-when="number" type="number" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" ng-change="tab1.onCellChange(row,rowForm,col.field)"/>
-									<select ng-switch-when="pick" ng-model="row[col.field]" ng-options="acc.name as acc.name for acc in tab1.accounts" ng-change = "tab1.selectAccount(row,rowForm,col.field)" class="editable-input form-control input-sm"></select>
+									<input ng-switch-default type="text" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" ng-change="tab1.onCellChange(row,col.field)"/>
+									<input ng-switch-when="number" type="number" name="{{col.field}}" ng-model="row[col.field]" class="editable-input form-control input-sm" ng-change="tab1.onCellChange(row,col.field)"/>
+									<select ng-switch-when="pick" ng-model="row[col.field]" ng-options="acc.name as acc.name for acc in tab1.accounts" ng-change = "tab1.selectAccount(row,col.field)" class="editable-input form-control input-sm"></select>
+									<sv-picklist ng-switch-when="pick2" ng-model="row[col.field]" info="tab1.accounts" row="row" val ="row[col.field]" parFieldName="col.field" tab1="tab1"/>
 								</div>
 								<div ng-if="col.dataType === 'command'">
 									<input type="checkbox" ng-click="tab1.processEdit(row)" ng-model = "row.isEditing" />

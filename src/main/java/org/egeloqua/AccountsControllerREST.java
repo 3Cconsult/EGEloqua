@@ -20,7 +20,8 @@ public class AccountsControllerREST {
 	public List<Account> findAccounts() {
 		System.out.println("query1");
 		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
-		List<Account> oListOfAccounts = eloqua.getAccounts("test*"); // Query Accounts
+//		List<Account> oListOfAccounts = eloqua.getAccounts("test*"); // Query Accounts
+		List<Account> oListOfAccounts = eloqua.getAccounts("*"); // Query Accounts
 		System.out.println("query2");
 		return oListOfAccounts;
 	}
