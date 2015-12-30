@@ -74,7 +74,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				show : true,
 				isReadOnly : false,
 				width : '15%'
-			}, {
+/*			}, {
 				field : "accountName",
 				title : "accountName2",
 				filter : {
@@ -86,7 +86,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				show : true,
 				isReadOnly : false,
 				width : '15%'
-			}, {
+*/			}, {
 				field : "accountId",
 				title : "accountId",
 				filter : {

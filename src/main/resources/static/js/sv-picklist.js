@@ -51,12 +51,12 @@ app_directives.directive('svPicklist', function(){
 				var i;
 				for(i=0;i<$scope.aItems.length;i++){
 					var item = $scope.aItems[i];
-					if(bFindStrict && item.name == val){
+					if(bFindStrict && item.name.toUpperCase() == val.toUpperCase()){
 						$scope.aShown = [];
 						$scope.aShown.push(item);
 						break;
 					}
-					if(item.name.indexOf(val)==0){
+					if(item.name.toUpperCase().indexOf(val.toUpperCase())==0){
 						$scope.aShown.push(item);
 					}
 				}
