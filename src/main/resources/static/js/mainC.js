@@ -10,6 +10,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 	contactTableController.$inject = ["NgTableParams", "Contact","Account","$scope"];
 	function contactTableController(NgTableParams, Contact, Account) {
 		var self = this;
+		self.addCnt=0;
 		var originalData = angular.copy(dataset);
 		self.cols = [
 			{
@@ -17,6 +18,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				title : "",
 				dataType : "command",
 				show : true,
+//				headerTemplateURL: "headerCheckbox.html",
 				width : '4%'
 			},	{
 				field : "id",
@@ -25,7 +27,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 					id : "text"
 				},
 				sortable : "id",
-				dataType : "text",
+				dataType : "id",
 				show : true,
 				isReadOnly : true,
 				width : '8%'
@@ -145,7 +147,15 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 		];
 		
 		
-
+		self.getId = function(row){
+			if(row.id == null){
+				return "";
+			}
+			if(row.id.indexOf("temp")==0){
+				return "";
+			}
+			return row.id;
+		}
 		self.tableParams = new NgTableParams({
 				filter:{}
 				,count : 5
@@ -222,29 +232,17 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			self.onCellChange(row,fieldName);
 			self.onCellChange(row,"accountId");
 		}
-		
-/*		function checkPopup(row,rowForm,fieldName){
-			var cntAccs = 0;
-			var curAcc = null;
-			_.each(self.accounts, function (acc){
-				if(acc.name == row.accountName){
-					cntAccs +=1;
-					curAcc = acc;
-				}
-			});
-			if(cntAccs===1){
-				row.accountId = curAcc.id;
-			}
-		}
-*/
 		function add() {
 			self.isEditing = true;
 			self.isAdding = true;
-			self.tableParams.settings().dataset.unshift( new Contact({
+			var con = new Contact({
 				name : "",
-				isInsert : true,
-				isEditing : true
-			}));
+				isInsert : true
+//				,id:"temp"+(++self.addCnt)
+			});
+			self.invertEdit(con);
+			self.tableParams.settings().dataset.unshift( con);
+			
 			// we need to ensure the user sees the new row we've just added.
 			// it seems a poor but reliable choice to remove sorting and move them to the first page
 			// where we know that our new item was added to
@@ -283,6 +281,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				if (item.isDirty) {
 					if (item.isInsert) {
 						item.name = 'test ' + item.name;
+						delete item.id;
 						item.$save();
 
 					} else {

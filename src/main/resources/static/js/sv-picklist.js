@@ -19,7 +19,11 @@ app_directives.directive('svPicklist', function(){
 				"</div>" ,
        controller: function($scope){
 			$scope.aShown = [];
+			if($scope.val == null){
+				$scope.val = "";
+			}
 			$scope.prevval = $scope.val;
+			
 			$scope.pickRecord = function (option){
 				$scope.parRecord.accountName = option.name;
 				$scope.parRecord.accountId = option.id;
