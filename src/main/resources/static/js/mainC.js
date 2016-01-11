@@ -8,8 +8,9 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 
 	angular.module("myApp").controller("contactTableController", contactTableController);
 	contactTableController.$inject = ["NgTableParams", "Contact","Account","$scope"];
-	function contactTableController(NgTableParams, Contact, Account) {
+	function contactTableController(NgTableParams, Contact, Account,$scope) {
 		var self = this;
+		self.aEdit = [];
 		self.addCnt=0;
 		var originalData = angular.copy(dataset);
 		self.cols = [
@@ -18,7 +19,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 				title : "",
 				dataType : "command",
 				show : true,
-//				headerTemplateURL: "headerCheckbox.html",
+				headerTemplateURL: "headerCheckbox.html",
 				width : '4%'
 			},	{
 				field : "id",
@@ -147,6 +148,19 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 		];
 		
 		
+		$scope.$watch(
+			function() {
+				return self.tableParams.isEditing;
+			}, function(value) {
+				_.each(self.tableParams.data, function (row) {
+					if(row.isEditing != self.tableParams.isEditing){
+						row.isEditing = self.tableParams.isEditing;
+						self.processEdit(row);
+					}
+				});
+			}
+		);
+		
 		self.getId = function(row){
 			if(row.id == null){
 				return "";
@@ -159,6 +173,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 		self.tableParams = new NgTableParams({
 				filter:{}
 				,count : 5
+				,isEditing: false
 			}, {
 				counts : [5, 20, 100],
 				dataset : angular.copy(dataset)
@@ -166,7 +181,6 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 		self.getAccountNames = getAccountNames;
 		self.accounts = accounts;
 		self.aDelete = [];
-		self.aEdit =[];
 		
 		self.add = add;
 		self.cancelChanges = cancelChanges;
@@ -233,12 +247,18 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			self.onCellChange(row,"accountId");
 		}
 		function add() {
-			self.isEditing = true;
+			_.each(self.tableParams.data, function (row) {
+					if(row.isEditing && row.isInsert){
+						row.isEditing = false;
+						self.processEdit(row);
+					}
+				}
+			);
 			self.isAdding = true;
 			var con = new Contact({
 				name : "",
 				isInsert : true
-//				,id:"temp"+(++self.addCnt)
+				,id:"temp"+(++self.addCnt)
 			});
 			self.invertEdit(con);
 			self.tableParams.settings().dataset.unshift( con);
@@ -277,10 +297,12 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 			_.each(self.aDelete, function (item) {
 				item.$delete();
 			});
+			self.aDelete = [];
 			_.each(self.tableParams.settings().dataset, function (item) {
 				if (item.isDirty) {
 					if (item.isInsert) {
-						item.name = 'test ' + item.name;
+//						item.name = 'test ' + item.name;
+						item.emailAddress = 'test'+item.emailAddress;
 						delete item.id;
 						item.$save();
 
@@ -292,6 +314,7 @@ angular.module("myApp", ["ngResource", "ngTable", 'ngAnimate', 'ui.bootstrap', '
 					item.isEditing = false;
 				}
 			});
+			self.aEdit=[];
 		}
 
 		function cancelChanges() {
