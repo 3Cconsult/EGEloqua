@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.egeloqua.model.data.Contact;
@@ -17,10 +18,17 @@ import java.util.List;
 public class ContactsControllerREST {
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public List<Contact> findContacts() {
+	public List<Contact> findContacts(
+		@RequestParam(required = false) String search,
+		@RequestParam(required = false) Integer count,
+		@RequestParam(required = false) Integer page
+	) {
 		System.out.println("query1");
 		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
-		List<Contact> oListOfContacts = eloqua.getContacts("test*"); // Query Contacts
+/*		if(search == null){
+			search = "emailaddress=test*";
+		}
+*/		List<Contact> oListOfContacts = eloqua.getContacts(search,count,page); // Query Contacts
 		System.out.println("query2");
 		return oListOfContacts;
 	}

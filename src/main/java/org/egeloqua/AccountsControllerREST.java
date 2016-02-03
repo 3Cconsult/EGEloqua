@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.egeloqua.model.data.Account;
 import org.egeloqua.Eloqua;
@@ -13,15 +14,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/accountsAPI")
-
 public class AccountsControllerREST {
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public List<Account> findAccounts() {
+	public List<Account> findAccounts(
+		@RequestParam(required = false) String search,
+		@RequestParam(required = false) Integer count,
+		@RequestParam(required = false) Integer page
+	) {
+
+	
 		System.out.println("query1");
 		Eloqua eloqua = new Eloqua("EGTEST", "API.Test", "VInter1234"); // Login on client instance
-//		List<Account> oListOfAccounts = eloqua.getAccounts("test*"); // Query Accounts
-		List<Account> oListOfAccounts = eloqua.getAccounts("*"); // Query Accounts
+		List<Account> oListOfAccounts = eloqua.getAccounts(search,count,page); // Query Accounts
 		System.out.println("query2");
 		return oListOfAccounts;
 	}

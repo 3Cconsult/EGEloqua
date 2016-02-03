@@ -135,10 +135,21 @@ public class Eloqua {
 		}
 	}
 
-	public List <Contact> getContacts(String email){
+	public List <Contact> getContacts(String search,Integer count,Integer page){
 		try {
 			// Use the basic Rest client
-			String sResponse = client.execute("/data/contacts?depth=complete&search=" + URLEncoder.encode("emailaddress=" + email, "UTF-8"), "GET", null);
+			String sUrl = "/data/contacts?depth=complete";
+			if(search != null){
+				sUrl+="&search=" + URLEncoder.encode(search, "UTF-8");
+			}
+			if (count != null){
+				sUrl+="&count="+count;
+			}
+			if(page != null){
+				sUrl+="&page="+page;
+			}
+			
+			String sResponse = client.execute(sUrl, "GET", null);
 			JsonElement je = new JsonParser().parse(sResponse);
 			
 			// Dive into the elements
@@ -159,11 +170,22 @@ public class Eloqua {
 			return null;
 		}		
 	}
-	
-	public List <Account> getAccounts(String name){
+	public List <Account> getAccounts(String search,Integer count,Integer page){
 		try {
 			// Use the basic Rest client
-			String sResponse = client.execute("/data/accounts?depth=complete&search=" + URLEncoder.encode("name=" + name, "UTF-8"), "GET", null);
+			String sUrl = "/data/accounts?depth=complete";
+			
+			if(search != null){
+				sUrl+="&search=" + URLEncoder.encode(search, "UTF-8");
+			}
+			if (count != null){
+				sUrl+="&count="+count;
+			}
+			if(page != null){
+				sUrl+="&page="+page;
+			}
+						
+			String sResponse = client.execute(sUrl, "GET", null);
 			JsonElement je = new JsonParser().parse(sResponse);
 			
 			// Dive into the elements
